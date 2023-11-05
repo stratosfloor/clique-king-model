@@ -43,15 +43,46 @@ void main() async {
       expect: () => [],
       verify: (bloc) => bloc.state is UserInitial,
     );
-
+    /*
+      TODO: FEL FEL FELFEL
+    */
     blocTest(
       'Emits LoginInProgress on UserStarted Event (which should be sent on app startup)',
       build: () => UserBloc(
           authenticationRepository: authenticationRepository,
           userRepository: userRepository),
-      act: (bloc) => bloc.add(UserStarted()), // UserStarted is a Naming Convention
+      act: (bloc) =>
+          bloc.add(UserStarted()), // UserStarted is a Naming Convention
       expect: () => [UserLoginInProgress()], // why userstarted -> userlogin?
       // try login using local token if exists?
     );
+
+    blocTest(
+      'Emits RegisterProgess on UserRegister Event ',
+      build: () => UserBloc(
+          authenticationRepository: authenticationRepository,
+          userRepository: userRepository),
+      act: (bloc) => bloc.add(UserRegister(
+          email: 'test@test.com', password: 'hej123', name: 'Test')),
+      expect: () => [UserRegisterInProgess()],
+    );
+    // blocTest(
+    //   'Emits LoginFailure on failed Login Event ',
+    //   build: () => UserBloc(
+    //       authenticationRepository: authenticationRepository,
+    //       userRepository: userRepository),
+    //   act: (bloc) =>
+    //       bloc.add(UserLogin(email: 'test@test.com', password: 'hej123')),
+    //   expect: () => [UserLoginFailure()],
+    // );
+    // blocTest(
+    //   'Emits LoginSuccessn on successfull Login Event ',
+    //   build: () => UserBloc(
+    //       authenticationRepository: authenticationRepository,
+    //       userRepository: userRepository),
+    //   act: (bloc) =>
+    //       bloc.add(UserLogin(email: 'tester@lester.com', password: 'test123')),
+    //   expect: () => [UserLoginSuccess()],
+    // );
   });
 }
