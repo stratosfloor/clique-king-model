@@ -31,7 +31,14 @@ final class UserRepository {
 
   Future<User> read({required String id}) async {
     try {
-      if (await store.collection('users').document(id).exists) {
+      print('5');
+      //
+      // HÄR BLiR DET FEL NÄR DET KOMMER FRÅN BLOC
+      //
+      final exists = await store.collection('users').document(id).exists;
+      print(exists);
+      if (exists) {
+        print('6');
         final user = await store.collection('users').document(id).get();
         return User.fromMap(user.map);
       } else {
@@ -72,7 +79,7 @@ final class UserRepository {
 
   Future<List<User>> list() async {
     try {
-      final allDocs = await Firestore.instance.collection("users").get();
+      final allDocs = await store.collection("users").get();
       return allDocs.map((doc) => User.fromMap(doc.map)).toList();
     } catch (e) {
       return Future.error(e);
