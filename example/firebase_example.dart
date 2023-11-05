@@ -24,21 +24,32 @@ void main() async {
       apiKey, await HiveStore.create(path: Directory.current.path));
   Firestore.initialize(projectId);
   try {
-    await FirebaseAuth.instance.signUp("tester@lester.com", "test123"); // successful signup = logged in
+    await FirebaseAuth.instance.signUp(
+        "tester@lester.com", "test123"); // successful signup = logged in
+    // final hej = await FirebaseAuth.instance.signIn('test@tt.com', '123qwe');
+    print('--------------HEJ-------------------');
+    // print(hej);
+    print('-----------------------------');
   } catch (e) {
     print(e);
   }
 
   FirebaseAuth.instance.signInState.listen((event) {
+    print('------Sign in event---------');
     print(event);
+    print('-----------------');
   });
 
   Firestore.instance.collection("users").stream.listen((event) {
+    print('------Listen event---------------');
     print(event);
+    print('-----------------');
   });
 
   var user = await FirebaseAuth.instance.getUser();
+  print('--------USER:----------');
   print(user.toString());
+  print('-----------------');
 
   final document =
       await Firestore.instance.collection("users").add(user.toMap());
@@ -49,18 +60,20 @@ void main() async {
     },
   );
 
+  print('--------DOCUMENT:----------');
   print(document);
+  print('-----------------');
   var read = auth.User.fromMap(document.map);
   print(read);
 
-  await Firestore.instance.collection("users").document(document.id).delete();
+  // await Firestore.instance.collection("users").document(document.id).delete();
 
-  var exists =
-      await Firestore.instance.collection("users").document(document.id).exists;
+  // var exists =
+  //     await Firestore.instance.collection("users").document(document.id).exists;
 
-  if (!exists) {
-    await FirebaseAuth.instance.deleteAccount();
-  }
+  // if (!exists) {
+  //   await FirebaseAuth.instance.deleteAccount();
+  // }
   await Future.delayed(Duration(seconds: 1));
 
   exit(255);

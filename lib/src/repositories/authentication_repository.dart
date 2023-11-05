@@ -24,25 +24,40 @@ final class AuthenticationRepository {
     }
   }
 
-  Future<User> loginFirebaseAuth({
+  Future<String> loginFirebaseAuth({
     required String email,
     required String password,
   }) async {
     try {
-      return await auth.signIn(email, password);
+      final user = await auth.signIn(email, password);
+      return user.id;
     } on AuthException catch (e) {
-      return Future.error(e.message);
+      throw Future.error(e.message);
     } catch (e) {
-      return Future.error(e);
+      throw Future.error(e);
     }
   }
 
   Future<User> getUser() async {
     try {
-      return await auth.getUser();
+      if (auth.isSignedIn) {
+        return await auth.getUser();
+      }
     } catch (e) {
       throw (e.toString());
     }
+    return Future.error('error');
+  }
+
+  Future<String> getUserId() async {
+    try {
+      if (auth.isSignedIn) {
+        return auth.userId;
+      }
+    } catch (e) {
+      throw (e.toString());
+    }
+    return Future.error('Something went wrong');
   }
 
   void logoutFirebaseAuth() {
@@ -52,6 +67,18 @@ final class AuthenticationRepository {
       }
     } catch (e) {
       print(e);
+    }
+  }
+
+  Future<bool> isSignedIn() {
+    try {
+      if (auth.isSignedIn) {
+        return Future.value(true);
+      } else {
+        return Future.value(false);
+      }
+    } catch (e) {
+      return Future.error(e);
     }
   }
 }
