@@ -81,4 +81,17 @@ final class AuthenticationRepository {
       return Future.error(e);
     }
   }
+
+  Future<bool> delete() async {
+    try {
+      if (auth.isSignedIn) {
+        auth.deleteAccount();
+        return Future.value(true);
+      } else {
+        return Future.value(false);
+      }
+    } catch (e) {
+      return Future.value(false);
+    }
+  }
 }
