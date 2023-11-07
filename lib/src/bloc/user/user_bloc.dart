@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:clique_king_model/clique_king_model.dart';
 import 'package:clique_king_model/src/models/user.dart';
+import 'package:firedart/auth/exceptions.dart';
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
 
@@ -79,20 +80,14 @@ final class UserLoginSuccess extends UserState {
   List<Object?> get props => [user];
 }
 
-final class UserLoginSuccess2 extends UserState {
-  @override
-  List<Object?> get props => [];
-}
-
 final class UserLoginFailure extends UserState {
   @override
   List<Object?> get props => [];
 }
 
 final class UserBloc extends Bloc<UserEvent, UserState> {
-  final UserRepository _userRepo; // passed in so it can be easily mocked
-  final AuthenticationRepository
-      _authRepo; // passed in so it can be easily mocked
+  final UserRepository _userRepo;
+  final AuthenticationRepository _authRepo;
 
   UserBloc(
       {required UserRepository userRepository,
@@ -104,54 +99,53 @@ final class UserBloc extends Bloc<UserEvent, UserState> {
       (event, emit) async {
         switch (event) {
           case UserStarted():
-            // TODO: Attempt to login using potentially stored local token.
-
             if (await _authRepo.isSignedIn()) {
-              print(await _authRepo.isSignedIn());
               final userId = await _authRepo.getUserId();
-              print(_userRepo);
-              print(userId);
-              //
-              //TODO: HÄR BLIR DET FEL
-              //
               final user = await _userRepo.read(id: userId);
-              // print(user);
-              print('6');
-
-              // emit(UserLoginSuccess(user: user));
+              emit(UserLoginSuccess(user: user));
             }
-
             emit(UserLoginInProgress());
 
           case UserLogin():
-            // TODO: Handle this case.
-            // print(event.email);
-            // print(event.password);
             try {
               final userId = await _authRepo.loginFirebaseAuth(
                   email: event.email, password: event.password);
-              // print(userId);
               if (await _userRepo.store.document(userId).exists) {
                 final user = await _userRepo.read(id: userId);
-                print(state.props);
-                // emit(UserLoginSuccess(user: user));
+                emit(UserLoginSuccess(user: user));
               }
             } catch (e) {
               print(e);
+              emit(UserLoginFailure());
             }
-
             emit(UserLoginFailure());
 
           case UserRegister():
-            emit(UserRegisterInProgess());
-          // TODO: Handle this case.
-          // if fail emit registerfailre
-          // if success emit registersuccess
+            try {
+              final authUser = await _authRepo.createFirebaseAuth(
+                  email: event.email, password: event.password);
+              if (await _authRepo.isSignedIn()) {
+                final user =
+                    await _userRepo.create(name: event.name, id: authUser.id);
+                emit(UserRegisterSuccess(user: user));
+              }
+            } catch (e) {
+              emit(UserRegisterFailure());
+            }
+            emit(UserRegisterFailure());
 
           case UserLogout():
-          // TODO: Handle this case.
+            if (await _authRepo.isSignedIn()) {
+              _authRepo.logoutFirebaseAuth();
+              emit(UserInitial());
+            }
           case UserDelete():
-          // TODO: Handle this case.
+            if (await _authRepo.isSignedIn()) {
+              final userId = await _authRepo.getUserId();
+              _userRepo.delete(id: userId);
+              _authRepo.delete();
+              emit(UserInitial());
+            }
         }
       },
     );
