@@ -31,14 +31,7 @@ final class UserRepository {
 
   Future<User> read({required String id}) async {
     try {
-      print('5');
-      //
-      // HÄR BLiR DET FEL NÄR DET KOMMER FRÅN BLOC
-      //
-      final exists = await store.collection('users').document(id).exists;
-      print(exists);
-      if (exists) {
-        print('6');
+      if (await store.collection('users').document(id).exists) {
         final user = await store.collection('users').document(id).get();
         return User.fromMap(user.map);
       } else {
