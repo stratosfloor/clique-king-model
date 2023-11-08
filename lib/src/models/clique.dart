@@ -1,20 +1,35 @@
+import 'package:clique_king_model/src/models/score.dart';
 import 'package:meta/meta.dart';
-
-typedef UserId = String;
-typedef ParticipantScore = int;
+import 'package:uuid/uuid.dart';
 
 @immutable
 class Clique {
-  final String id; // TODO: generate with uuid?
-  final String name; // creator selects name of clique
+  final String? id;
+  final String name;
+  final List<Score> scores;
 
-  final Map<UserId, ParticipantScore> participantScoreMap;
+  Clique.onCreate({
+    required this.name,
+  })  : id = Uuid().v4(),
+        scores = const [];
 
-  // TODO: Reflect over participantScores
-  // The user with the highest score is the Clique King
+  Clique({
+    required this.id,
+    required this.name,
+    required this.scores,
+  });
 
-  Clique(
-      {required this.id,
-      required this.name,
-      required this.participantScoreMap});
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'name': name,
+        'score': scores,
+      };
+
+  factory Clique.fromMap(Map<String, dynamic> map) {
+    return Clique(
+      name: map['name'] as String,
+      id: map['id'] as String,
+      scores: (map['score'] as List).map((map) => Score.fromMap(map)).toList(),
+    );
+  }
 }
