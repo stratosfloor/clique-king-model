@@ -22,4 +22,6 @@ class Score {
       score: map['score'] as int,
     );
   }
+  @override
+  String toString() => toMap().toString();
 }
