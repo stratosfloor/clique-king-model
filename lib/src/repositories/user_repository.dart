@@ -4,24 +4,23 @@ import 'package:meta/meta.dart';
 
 @immutable
 final class UserRepository {
-  final Firestore store; // pass it in so it can be mocked.
+  final Firestore store;
+  final CollectionReference usersRef;
 
-  UserRepository({required this.store});
+  UserRepository({
+    required this.store,
+  }) : usersRef = Firestore.instance.collection('users');
 
-  // TODO: Create methods for managing users stored in Firebase Firestore.
-  // With Firestore, you have the option to return data once, or return a stream which emits
-  // data anytime data in the query changes.
   Future<User> create({
     required String name,
     required String id,
   }) async {
     final user = User(name: name, id: id);
     try {
-      if (await store.collection('users').document(id).exists) {
+      if (await usersRef.document(id).exists) {
         return Future.error('ID already exists');
       } else {
-        final document =
-            await store.collection('users').document(id).create(user.toMap());
+        final document = await usersRef.document(id).create(user.toMap());
         return User.fromMap(document.map);
       }
     } catch (e) {
@@ -31,8 +30,8 @@ final class UserRepository {
 
   Future<User> read({required String id}) async {
     try {
-      if (await store.collection('users').document(id).exists) {
-        final user = await store.collection('users').document(id).get();
+      if (await usersRef.document(id).exists) {
+        final user = await usersRef.document(id).get();
         return User.fromMap(user.map);
       } else {
         return Future.error('Id not found');
@@ -44,7 +43,7 @@ final class UserRepository {
 
   Future<bool> update({required User user}) async {
     try {
-      if (await store.collection('users').document(user.id).exists) {
+      if (await usersRef.document(user.id).exists) {
         await Firestore.instance
             .collection("users")
             .document(user.id)
@@ -59,8 +58,8 @@ final class UserRepository {
 
   Future<bool> delete({required String id}) async {
     try {
-      if (await store.collection('users').document(id).exists) {
-        await Firestore.instance.collection("users").document(id).delete();
+      if (await usersRef.document(id).exists) {
+        await usersRef.document(id).delete();
         return Future.value(true);
       } else {
         return Future.value(false);
@@ -72,7 +71,7 @@ final class UserRepository {
 
   Future<List<User>> list() async {
     try {
-      final allDocs = await store.collection("users").get();
+      final allDocs = await usersRef.get();
       return allDocs.map((doc) => User.fromMap(doc.map)).toList();
     } catch (e) {
       return Future.error(e);
