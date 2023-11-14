@@ -58,6 +58,14 @@ void main() async {
 
   final list = await userrepo.list();
 
+  final del = await auth.delete();
+  auth.logoutFirebaseAuth();
+
+  print('DELETE USER:');
+  print('-----------------:');
+  print(del);
+  print('-----------------:');
+
   print('DOCUMENT:');
   // // print(doc.id);
   // print('-----------');
@@ -67,6 +75,7 @@ void main() async {
   print('READ USER:');
   print(readUser);
   // print(fetchedUser.id);
+  print('READ USER:');
   print('-----------------:');
 
   print('LIST: ');
