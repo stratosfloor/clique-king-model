@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:clique_king_model/clique_king_model.dart';
+import 'package:clique_king_model/src/models/user.dart';
 import 'package:dotenv/dotenv.dart';
 import 'package:firedart/firedart.dart';
 import 'package:test/test.dart';
@@ -8,6 +9,7 @@ import 'package:bloc_test/bloc_test.dart';
 
 void main() async {
   // TODO: Expand these tests.
+  // TODO: Tests not done, only some work.
 
   group('A group of tests', () {
     late AuthenticationRepository authenticationRepository;
@@ -43,9 +45,19 @@ void main() async {
       expect: () => [],
       verify: (bloc) => bloc.state is UserInitial,
     );
-    /*
-      TODO: FEL FEL FELFEL
-    */
+
+    blocTest(
+      'UserLogut emit UserInital',
+      build: () => UserBloc(
+          authenticationRepository: authenticationRepository,
+          userRepository: userRepository),
+      act: (bloc) =>
+          bloc.add(UserLogout()), // UserStarted is a Naming Convention
+      expect: () => [UserInitial()], // why userstarted -> userlogin?
+      // try login using local token if exists?
+      wait: Duration(seconds: 1),
+    );
+
     blocTest(
       'Emits LoginInProgress on UserStarted Event (which should be sent on app startup)',
       build: () => UserBloc(
@@ -55,34 +67,39 @@ void main() async {
           bloc.add(UserStarted()), // UserStarted is a Naming Convention
       expect: () => [UserLoginInProgress()], // why userstarted -> userlogin?
       // try login using local token if exists?
+      wait: Duration(seconds: 1),
     );
-
     blocTest(
-      'Emits RegisterProgess on UserRegister Event ',
+      'Emits LoginFailure on failed Login Event ',
       build: () => UserBloc(
           authenticationRepository: authenticationRepository,
           userRepository: userRepository),
-      act: (bloc) => bloc.add(UserRegister(
-          email: 'test@test.com', password: 'hej123', name: 'Test')),
-      expect: () => [UserRegisterInProgess()],
+      act: (bloc) =>
+          bloc.add(UserLogin(email: 'test@test.com', password: 'hej123')),
+      expect: () => [UserLoginFailure()],
+      wait: Duration(seconds: 1),
     );
+
     // blocTest(
-    //   'Emits LoginFailure on failed Login Event ',
+    //   'Emits RegisterProgess on UserRegister Event ',
     //   build: () => UserBloc(
     //       authenticationRepository: authenticationRepository,
     //       userRepository: userRepository),
-    //   act: (bloc) =>
-    //       bloc.add(UserLogin(email: 'test@test.com', password: 'hej123')),
-    //   expect: () => [UserLoginFailure()],
+    //   act: (bloc) => bloc.add(UserRegister(
+    //       email: 'test@test.com', password: 'hej123', name: 'Test')),
+    //   expect: () => [UserRegisterInProgess()],
+    //   wait: Duration(seconds: 1),
     // );
-    // blocTest(
-    //   'Emits LoginSuccessn on successfull Login Event ',
-    //   build: () => UserBloc(
-    //       authenticationRepository: authenticationRepository,
-    //       userRepository: userRepository),
-    //   act: (bloc) =>
-    //       bloc.add(UserLogin(email: 'tester@lester.com', password: 'test123')),
-    //   expect: () => [UserLoginSuccess()],
-    // );
+
+    blocTest(
+      'Emits LoginSuccessn on successfull Login Event ',
+      build: () => UserBloc(
+          authenticationRepository: authenticationRepository,
+          userRepository: userRepository),
+      act: (bloc) =>
+          bloc.add(UserLogin(email: 'test@tt.com', password: '123qwe')),
+      expect: () => [UserLoginSuccess(user: User(name: 'name', id: 'id'))],
+      wait: Duration(seconds: 1),
+    );
   });
 }
