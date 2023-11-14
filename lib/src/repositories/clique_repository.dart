@@ -42,8 +42,12 @@ final class CliqueRepository {
   Future<Clique> read({required String id}) async {
     try {
       final query = await cliquesRef.where('id', isEqualTo: id).get();
-      // Ony one should exists
-      return Clique.fromMap(query.first.map);
+      // Only one should exists
+      if (query.isNotEmpty) {
+        return Clique.fromMap(query.first.map);
+      } else {
+        throw Future.error('No Clique found');
+      }
     } catch (e) {
       return Future.error('error');
     }
@@ -134,6 +138,25 @@ final class CliqueRepository {
       return docs.map((doc) => Score.fromMap(doc.map)).toList();
     } catch (e) {
       return Future.error(e);
+    }
+  }
+
+  Future<Score> getScore({
+    required String docid,
+    required String userId,
+  }) async {
+    try {
+      final scoreDocId =
+          await getScoreDocumentId(cliqueId: docid, userId: userId);
+      final score = await cliquesRef
+          .document(docid)
+          .collection('scores')
+          .document(scoreDocId)
+          .get();
+      return Score.fromMap(score.map);
+    } catch (e) {
+      print(e);
+      return Future.error('error');
     }
   }
 
