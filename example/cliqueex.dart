@@ -73,6 +73,11 @@ void main() async {
   print(listscores.toString());
   print('---------------------');
 
+  print('GET SCORE');
+  final getscore = await clique.getScore(docid: docid, userId: 'Jan');
+  print(getscore.toString());
+  print('---------------------');
+
   // print('GET SCOREDOCUMENT ID');
   // final scoreid = await clique.getScoreDocumentId(
   //     cliqueId: "VhCmZrmMZqDbGftefrS3", userId: 'Karl');
